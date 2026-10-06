@@ -133,7 +133,7 @@
         <p class="text-xs text-center text-slate-500 font-semibold mt-1">এআই স্বাস্থ্য বিশ্লেষক (বাঙালি স্কেল)</p>
     </header>
 
-    <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 z-10 relative">
+    <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar p-4 pb-36 z-10 relative">
         
         <!-- Tab 1: Body Profile -->
         <div id="tab-body" class="space-y-4">
@@ -222,12 +222,21 @@
                 <div id="maritalLifeDiv" class="mt-4 hidden animate-[slideUp_0.3s_ease-out]">
                     <label class="block text-xs font-bold text-slate-500 mb-1">দাম্পত্য জীবন কেমন কাটছে?</label>
                     <select id="maritalLife" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
-                        <option value="good">সুখী / স্বাভাবিক</option>
+                        <option value="very_happy">খুব ভালো / সুখী</option>
+                        <option value="normal" selected>স্বাভাবিক</option>
+                        <option value="moderate">মাঝামাঝি / মানিয়ে নিচ্ছি</option>
                         <option value="stressful">অশান্তি / মানসিক চাপযুক্ত</option>
+                        <option value="toxic">অত্যন্ত অশান্তির / বিষাক্ত</option>
                     </select>
                 </div>
             </div>
-            <button onclick="switchTab('tab-habits')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">পরবর্তী ধাপ (অভ্যাস) &rarr;</button>
+            
+            <!-- Live Quick BMI -->
+            <div id="live-bmi-container" class="mb-4 p-3 bg-indigo-50 border border-indigo-100 rounded-xl text-center hidden">
+                <p id="live-bmi-display" class="text-sm font-bold text-slate-700"></p>
+            </div>
+
+            <button onclick="switchTab('tab-habits')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform mb-4">পরবর্তী ধাপ (অভ্যাস) &rarr;</button>
         </div>
 
         <div id="tab-habits" class="space-y-4 hidden">
@@ -251,7 +260,9 @@
                         <select id="mealCount" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
                             <option value="1-2">১-২ বার</option>
                             <option value="3" selected>৩ বার</option>
-                            <option value="4+">৪ বার বা তার বেশি</option>
+                            <option value="4">৪ বার</option>
+                            <option value="5">৫ বার</option>
+                            <option value="5+">৫ বারের বেশি</option>
                         </select>
                     </div>
                     <div>
@@ -275,9 +286,13 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">পানি পান (দৈনিক)</label>
                         <select id="water" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
-                            <option value="low">কম (১-১.৫ লিটার)</option>
-                            <option value="medium" selected>মাঝারি (২-২.৫ লিটার)</option>
-                            <option value="high">পর্যাপ্ত (৩+ লিটার)</option>
+                            <option value="<1">১ লিটারের কম</option>
+                            <option value="1.5">১.৫ লিটার</option>
+                            <option value="2">২ লিটার</option>
+                            <option value="2.5" selected>২.৫ লিটার</option>
+                            <option value="3">৩ লিটার</option>
+                            <option value="3.5">৩.৫ লিটার</option>
+                            <option value="4+">৪ লিটারের বেশি</option>
                         </select>
                     </div>
                     <div>
@@ -294,21 +309,26 @@
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">ঘুমের পরিমাণ</label>
                         <select id="sleep" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
-                            <option value="less">৬ ঘণ্টার কম</option>
-                            <option value="good" selected>৬-৮ ঘণ্টা</option>
-                            <option value="more">৮ ঘণ্টার বেশি</option>
+                            <option value="<5">৫ ঘণ্টার কম</option>
+                            <option value="5-6">৫-৬ ঘণ্টা</option>
+                            <option value="6-7" selected>৬-৭ ঘণ্টা</option>
+                            <option value="7-8">৭-৮ ঘণ্টা</option>
+                            <option value="8+">৮ ঘণ্টার বেশি</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-500 mb-1">মানসিক চাপ</label>
                         <select id="stress" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="none">একদম নেই</option>
                             <option value="normal" selected>স্বাভাবিক</option>
-                            <option value="high">অনেক বেশি / দুশ্চিন্তা</option>
+                            <option value="sometimes">মাঝে মাঝে</option>
+                            <option value="high">অনেক বেশি চাপ</option>
+                            <option value="severe">চরম দুশ্চিন্তা</option>
                         </select>
                     </div>
                 </div>
             </div>
-            <button onclick="switchTab('tab-medical')" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">পরবর্তী ধাপ (মেডিকেল) &rarr;</button>
+            <button onclick="switchTab('tab-medical')" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform mb-4">পরবর্তী ধাপ (মেডিকেল) &rarr;</button>
         </div>
 
         <div id="tab-medical" class="space-y-4 hidden">
@@ -325,6 +345,10 @@
                         <option value="fatigue">অতিরিক্ত ক্লান্তি ও দুর্বলতা</option>
                         <option value="headache">ঘন ঘন মাথা ব্যথা</option>
                         <option value="joint_pain">হাড় বা জয়েন্টে ব্যথা</option>
+                        <option value="gastric">গ্যাস্ট্রিক / বুক জ্বালাপোড়া</option>
+                        <option value="hairfall">অতিরিক্ত চুল পড়া</option>
+                        <option value="insomnia">অনিদ্রা / ঘুম না হওয়া</option>
+                        <option value="breathing">শ্বাসকষ্ট / হাঁপানি</option>
                     </select>
                 </div>
 
@@ -333,8 +357,9 @@
                         <label class="block text-xs font-bold text-slate-500 mb-1">রক্তচাপ (BP)</label>
                         <select id="bp" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
                             <option value="normal">স্বাভাবিক</option>
-                            <option value="high">উচ্চ (High BP)</option>
-                            <option value="low">নিম্ন (Low BP)</option>
+                            <option value="high">উচ্চ (High)</option>
+                            <option value="low">নিম্ন (Low)</option>
+                            <option value="fluctuating">ওঠা-নামা করে</option>
                         </select>
                     </div>
                     <div>
@@ -354,7 +379,7 @@
                     </div>
                 </div>
             </div>
-            <button onclick="generateReport()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform text-lg">
+            <button onclick="generateReport()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform text-lg mb-4">
                 ✨ এআই রিপোর্ট ও ডায়েট চার্ট তৈরি করুন
             </button>
         </div>
@@ -373,16 +398,20 @@
 
         <div id="tab-report" class="space-y-4 hidden pb-10">
             <div id="report-container"></div>
-            <!-- Image Download Button -->
-            <button id="download-btn" onclick="downloadReportAsImage()" class="no-print mt-6 w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+            <!-- Image Download Buttons -->
+            <button id="download-btn" onclick="downloadReportAsImage(false)" class="no-print mt-6 w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                রিপোর্টের ছবি ডাউনলোড করুন
+                পূর্ণাঙ্গ রিপোর্টের ছবি ডাউনলোড
+            </button>
+            <button id="download-btn-short" onclick="downloadReportAsImage(true)" class="no-print mt-2 w-full bg-indigo-100 text-indigo-700 font-bold py-4 rounded-xl shadow-sm active:scale-95 transition-transform flex items-center justify-center gap-2 border border-indigo-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                সংক্ষিপ্ত রিপোর্ট ডাউনলোড (টিপস ছাড়া)
             </button>
         </div>
 
     </main>
 
-    <nav class="absolute bottom-0 w-full glass-card rounded-none rounded-t-3xl pb-safe z-20 border-t border-white/40 no-print">
+    <nav class="fixed bottom-0 w-full glass-card rounded-none rounded-t-3xl pb-safe z-40 border-t border-white/40 no-print">
         <div class="flex justify-around items-center p-2">
             <button onclick="switchTab('tab-body')" class="nav-item nav-body active flex flex-col items-center p-2 text-slate-400 w-1/5">
                 <div class="nav-icon mb-1">
@@ -435,7 +464,7 @@
         }
 
         // Initialize Chips
-        const foodOptions = ['ভাত/রুটি', 'মাছ/মাংস', 'ডাল', 'শাকসবজি', 'ফলমূল', 'ফাস্টফুড', 'মিষ্টিজাতীয়', 'ভাজাপোড়া'];
+        const foodOptions = ['ভাত/রুটি', 'মাছ/মাংস', 'ডাল', 'শাকসবজি', 'ফলমূল', 'টক দই', 'শস্যজাতীয় (ওটস/ব্রাউন রাইস)', 'বাদাম/বীজ', 'ফাস্টফুড', 'মিষ্টিজাতীয়', 'ভাজাপোড়া'];
         const addictionOptions = ['ধূমপান', 'মদ/অ্যালকোহল', 'মাদক', 'পান-সুপারি', 'জর্দা/গুল', 'কোল্ড ড্রিংকস'];
         
         let selectedFoods = ['ভাত/রুটি', 'মাছ/মাংস'];
@@ -533,7 +562,37 @@
                     el.addEventListener('input', saveFormData);
                 }
             });
+
+            // Add live BMI listeners
+            document.getElementById('weight').addEventListener('input', updateLiveBMI);
+            document.getElementById('heightFeet').addEventListener('change', updateLiveBMI);
+            document.getElementById('heightInches').addEventListener('change', updateLiveBMI);
+            updateLiveBMI();
         };
+
+        function updateLiveBMI() {
+            const weight = parseFloat(document.getElementById('weight').getAttribute('data-raw')) || 0;
+            const hFeet = parseInt(document.getElementById('heightFeet').value) || 0;
+            const hInch = parseFloat(document.getElementById('heightInches').value) || 0;
+            
+            if (weight > 0 && hFeet > 0) {
+                const heightInMeters = ((hFeet * 12) + hInch) * 0.0254;
+                const bmi = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+                
+                let bmiCat, bmiColor;
+                if (bmi < 18.5) { bmiCat = "আন্ডারওয়েট"; bmiColor = "text-amber-500"; }
+                else if (bmi >= 18.5 && bmi < 23) { bmiCat = "স্বাভাবিক ও সুন্দর"; bmiColor = "text-emerald-500"; }
+                else if (bmi >= 23 && bmi < 25) { bmiCat = "ওভারওয়েট (ঝুঁকিপূর্ণ)"; bmiColor = "text-orange-500"; }
+                else { bmiCat = "ওবেসিটি"; bmiColor = "text-rose-600"; }
+
+                const container = document.getElementById('live-bmi-container');
+                const display = document.getElementById('live-bmi-display');
+                if(container && display) {
+                    display.innerHTML = `আপনার বর্তমান বিএমআই: <span class="font-extrabold ${bmiColor} text-lg">${toBenNum(bmi)}</span> (${bmiCat})`;
+                    container.classList.remove('hidden');
+                }
+            }
+        }
 
         function toggleMaritalLife() {
             const status = document.getElementById('maritalStatus').value;
@@ -755,18 +814,23 @@
 
                 if(bmi >= 23 && data.pregStatus !== 'pregnant') advices.push({icon: "🏃", title: "ওজন নিয়ন্ত্রণ (দক্ষিণ এশীয় স্কেল)", text: `বাঙালি স্কেল অনুযায়ী আপনার বিএমআই ২৩ এর উপরে, যা ওভারওয়েট। আদর্শ ওজন ${toBenNum(idealWeight)} কেজিতে নামিয়ে আনার চেষ্টা করুন।`});
                 
-                if(data.mealTiming === 'late_night' || data.mealCount === '1-2') advices.push({icon: "🌙", title: "খাবারের সময় ও রুটিন", text: "গভীর রাতে খাওয়া এবং দীর্ঘক্ষণ না খেয়ে থাকা মেটাবলিজম ধীর করে লিভারে ফ্যাট জমায়। দিনে অন্তত ৩ বার সময়মতো খাওয়ার চেষ্টা করুন।"});
+                if(data.mealTiming === 'late_night' || ['1-2'].includes(data.mealCount)) advices.push({icon: "🌙", title: "খাবারের সময় ও রুটিন", text: "গভীর রাতে খাওয়া এবং দীর্ঘক্ষণ না খেয়ে থাকা মেটাবলিজম ধীর করে লিভারে ফ্যাট জমায়। দিনে অন্তত ৩-৪ বার সময়মতো খাওয়ার চেষ্টা করুন।"});
                 
                 if(data.foods.includes('ফাস্টফুড') || data.foods.includes('মিষ্টিজাতীয়') || data.foods.includes('ভাজাপোড়া')) advices.push({icon: "🍔", title: "খাদ্যাভ্যাস সতর্কতা", text: "ফাস্টফুড ও ভাজাপোড়া আপনার ফ্যাটি লিভার এবং ওবেসিটির ঝুঁকি মারাত্মকভাবে বাড়াচ্ছে। এগুলো পরিহার করুন।"});
                 if(!data.foods.includes('শাকসবজি') && !data.foods.includes('ফলমূল')) advices.push({icon: "🥬", title: "ফাইবারের অভাব", text: "আপনার খাবারে পর্যাপ্ত শাকসবজির অভাব রয়েছে। সুস্থ ইমিউনিটির জন্য ফাইবারযুক্ত খাবার অত্যন্ত জরুরি।"});
+                if(data.foods.includes('টক দই') || data.foods.includes('বাদাম/বীজ') || data.foods.includes('শস্যজাতীয় (ওটস/ব্রাউন রাইস)')) advices.push({icon: "✅", title: "চমৎকার খাদ্যাভ্যাস", text: "টক দই, ওটস বা বাদাম আপনার অন্ত্রের স্বাস্থ্য ও ভালো কোলেস্টেরল বাড়াতে দারুণ ভূমিকা রাখছে। এই স্বাস্থ্যকর অভ্যাস চালিয়ে যান।"});
 
-                if(data.bowel === 'constipation' || data.water === 'low') advices.push({icon: "💧", title: "পানি ও হজম", text: "আপনার পানি পান কম হচ্ছে অথবা কোষ্ঠকাঠিন্য আছে। ইসবগুলের ভুসি এবং প্রতিদিন অন্তত ২.৫ লিটার পানি পানের অভ্যাস করুন।"});
+                if(data.bowel === 'constipation' || ['<1', '1.5'].includes(data.water)) advices.push({icon: "💧", title: "পানি ও হজম", text: "আপনার পানি পান অনেক কম হচ্ছে অথবা কোষ্ঠকাঠিন্য আছে। ইসবগুলের ভুসি এবং প্রতিদিন অন্তত ২.৫-৩ লিটার পানি পানের অভ্যাস করুন।"});
                 
-                if(data.stress === 'high' || (data.maritalStatus === 'married' && data.maritalLife === 'stressful')) advices.push({icon: "🧠", title: "মানসিক চাপ ও হরমোন", text: "অতিরিক্ত স্ট্রেস বা দাম্পত্য কলহ আপনার শরীরে কর্টিসল হরমোন বাড়িয়ে দেয়, যা মেদ বাড়ায়। প্রতিদিন অন্তত ১০ মিনিট মেডিটেশন বা ডিপ ব্রিদিং করুন।"});
+                if(['high', 'severe'].includes(data.stress) || ['stressful', 'toxic'].includes(data.maritalLife)) advices.push({icon: "🧠", title: "মানসিক চাপ ও হরমোন", text: "অতিরিক্ত স্ট্রেস বা মানসিক অশান্তি আপনার শরীরে কর্টিসল হরমোন বাড়িয়ে দেয়, যা মেদ বাড়ায় এবং হার্টের ক্ষতি করে। মেডিটেশন বা প্রফেশনাল কাউন্সেলিং এর কথা ভাবতে পারেন।"});
                 
+                if(['<5', '5-6'].includes(data.sleep)) advices.push({icon: "😴", title: "পর্যাপ্ত ঘুমের অভাব", text: "আপনার ঘুমের পরিমাণ ৬ ঘণ্টার কম, যা মেটাবলিজম এবং ব্রেনের উপর মারাত্মক চাপ ফেলছে। সুস্থ থাকতে রাতে অন্তত ৭-৮ ঘণ্টা নিরবচ্ছিন্ন ঘুম জরুরি।"});
+
                 if(data.symptoms === 'fatigue' || data.symptoms === 'joint_pain') advices.push({icon: "🦴", title: "ক্লান্তি ও হাড়ের ব্যথা", text: "ক্লান্তি ও জয়েন্টে ব্যথার প্রধান কারণ ভিটামিন ডি ও ক্যালসিয়ামের অভাব। রোদে হাঁটার অভ্যাস করুন এবং দুধ/ডিম খান।"});
+                if(data.symptoms === 'gastric') advices.push({icon: "🔥", title: "গ্যাস্ট্রিক সতর্কতা", text: "গ্যাস্ট্রিকের জন্য ভাজাপোড়া ও অতিরিক্ত মশলা এড়িয়ে চলুন। সকালে খালি পেটে কুসুম গরম পানি ও ইসবগুল খেতে পারেন।"});
+                if(data.symptoms === 'insomnia') advices.push({icon: "🦉", title: "অনিদ্রা সমস্যা", text: "ঘুম না হওয়ার কারণে স্বাস্থ্য ভেঙে যেতে পারে। রাতে চা/কফি এবং স্ক্রিন টাইম (মোবাইল) পরিহার করুন।"});
                 
-                if(data.bp === 'high' || data.diabetes !== 'none') advices.push({icon: "❤️", title: "প্রেশার ও ডায়াবেটিস সতর্কতা", text: "রক্তচাপ বা ডায়াবেটিসের জন্য কাঁচা লবণ ও চিনি সম্পূর্ণ বর্জন করুন। প্রতিদিন অন্তত ৩০ মিনিট ঘাম ঝরিয়ে হাঁটা আপনার জন্য ঔষধের মতো কাজ করবে।"});
+                if(['high', 'fluctuating'].includes(data.bp) || data.diabetes !== 'none') advices.push({icon: "❤️", title: "প্রেশার ও ডায়াবেটিস সতর্কতা", text: "রক্তচাপ বা ডায়াবেটিসের জন্য কাঁচা লবণ ও চিনি সম্পূর্ণ বর্জন করুন। প্রতিদিন অন্তত ৩০ মিনিট ঘাম ঝরিয়ে হাঁটা আপনার জন্য ঔষধের মতো কাজ করবে।"});
                 
                 if(data.addictions.length > 0) advices.push({icon: "⚠️", title: "নেশা ও ক্যানসারের ঝুঁকি", text: `${data.addictions.join(", ")} আপনার শরীরকে ভেতর থেকে ধ্বংস করছে। ক্যান্সার ও হার্ট অ্যাটাকের ঝুঁকি এড়াতে এগুলো দ্রুত বর্জন করুন।`});
 
@@ -807,7 +871,7 @@
                         </div>
                     </div>
 
-                    <div class="mt-6">
+                    <div class="mt-6" id="ai-advices-section">
                         <h3 class="font-extrabold text-slate-700 mb-4 flex items-center gap-2" style="font-family: var(--font-serif);">
                             <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
                             বিস্তারিত এআই পরামর্শ
@@ -846,15 +910,20 @@
         });
 
         // Image Download Function
-        function downloadReportAsImage() {
-            const btn = document.getElementById('download-btn');
+        function downloadReportAsImage(excludeTips = false) {
+            const btn = excludeTips ? document.getElementById('download-btn-short') : document.getElementById('download-btn');
             const originalText = btn.innerHTML;
             btn.innerHTML = 'অপেক্ষা করুন... ছবি তৈরি হচ্ছে...';
             btn.disabled = true;
 
             const element = document.getElementById('report-container');
             const userName = document.getElementById('userName').value.trim() || 'User';
+            const advicesSection = document.getElementById('ai-advices-section');
             
+            if (excludeTips && advicesSection) {
+                advicesSection.style.display = 'none';
+            }
+
             // Temporary styles for beautiful screenshot
             const originalBg = element.style.backgroundColor;
             const originalPadding = element.style.padding;
@@ -870,7 +939,7 @@
                 backgroundColor: '#f1f5f9'
             }).then(canvas => {
                 const link = document.createElement('a');
-                link.download = `Health_Report_${userName}.png`;
+                link.download = excludeTips ? `Short_Health_Report_${userName}.png` : `Health_Report_${userName}.png`;
                 link.href = canvas.toDataURL('image/png');
                 link.click();
 
@@ -879,12 +948,17 @@
                 element.style.padding = originalPadding;
                 element.style.borderRadius = originalRadius;
                 
+                if (excludeTips && advicesSection) {
+                    advicesSection.style.display = 'block';
+                }
+                
                 btn.innerHTML = originalText;
                 btn.disabled = false;
             }).catch(err => {
                 console.error(err);
                 btn.innerHTML = originalText;
                 btn.disabled = false;
+                if (excludeTips && advicesSection) advicesSection.style.display = 'block';
                 alert('দুঃখিত, ছবি ডাউনলোড করতে সমস্যা হয়েছে।');
             });
         }
