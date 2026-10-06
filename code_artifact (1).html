@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>স্মার্ট হেলথ ড্যাশবোর্ড</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Tiro+Bangla:ital,wght@0,400;1,400&family=Noto+Sans+Bengali:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --font-primary: 'Hind Siliguri', sans-serif;
+            --font-serif: 'Tiro Bangla', serif;
+            --font-display: 'Tiro Bangla', sans-serif;
+        }
+        body {
+            font-family: var(--font-primary);
+            background: #f1f5f9;
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* 3D Animated Background */
+        .bg-shapes {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+        }
+        .shape {
+            position: absolute;
+            filter: blur(60px);
+            opacity: 0.6;
+            animation: float 20s infinite alternate ease-in-out;
+        }
+        .shape-1 { width: 300px; height: 300px; background: #60a5fa; top: -10%; left: -10%; }
+        .shape-2 { width: 400px; height: 400px; background: #c084fc; bottom: -10%; right: -10%; animation-delay: -5s; }
+        .shape-3 { width: 250px; height: 250px; background: #34d399; top: 40%; left: 50%; animation-delay: -10s; }
+
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 50px) scale(1.2); }
+        }
+
+        /* Glass Card Effect */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            border-radius: 1.25rem;
+        }
+
+        /* Input styling */
+        .input-3d {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .input-3d:focus {
+            outline: none;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05), 0 0 0 3px rgba(59, 130, 246, 0.3);
+            border-color: #3b82f6;
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Multi-select Buttons */
+        .chip-btn {
+            padding: 8px 16px;
+            border-radius: 9999px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: all 0.2s;
+            background: rgba(255, 255, 255, 0.8);
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+        .chip-btn.selected {
+            background: #3b82f6;
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
+            transform: translateY(-1px);
+        }
+        .chip-btn.selected-danger {
+            background: #ef4444;
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4);
+            transform: translateY(-1px);
+        }
+
+        /* Bottom Nav Animations */
+        .nav-item { transition: all 0.3s; }
+        .nav-item.active { color: #2563eb; transform: translateY(-3px); }
+        .nav-item.active .nav-icon { background: #eff6ff; border-radius: 12px; padding: 4px 12px; }
+
+        .report-section { animation: slideUp 0.5s ease-out forwards; opacity: 0; transform: translateY(20px); }
+        @keyframes slideUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* Print Styles for PDF Generation */
+        @media print {
+            body { background: white !important; }
+            .bg-shapes, header, nav, .no-print { display: none !important; }
+            main { overflow: visible !important; height: auto !important; padding: 0 !important; margin: 0 !important; }
+            .glass-card { background: white !important; box-shadow: none !important; border: 1px solid #e2e8f0 !important; break-inside: avoid; }
+            #tab-report { display: block !important; }
+            #tab-body, #tab-habits, #tab-medical, #tab-progress { display: none !important; }
+            .print-show { display: block !important; }
+        }
+        .print-show { display: none; }
+    </style>
+</head>
+
+<body class="h-screen w-screen flex flex-col overflow-hidden text-slate-800">
+    <div class="bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <header class="pt-10 pb-4 px-6 glass-card rounded-none rounded-b-3xl z-20 shrink-0">
+        <h1 class="text-2xl font-extrabold text-center bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600" style="font-family: var(--font-serif);">
+            স্মার্ট হেলথ ড্যাশবোর্ড
+        </h1>
+        <p class="text-xs text-center text-slate-500 font-semibold mt-1">এআই স্বাস্থ্য বিশ্লেষক (বাঙালি স্কেল)</p>
+    </header>
+
+    <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar p-4 pb-24 z-10 relative">
+        
+        <!-- Tab 1: Body Profile -->
+        <div id="tab-body" class="space-y-4">
+            <div class="glass-card p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold">1</div>
+                    <h2 class="font-bold text-slate-700">শারীরিক তথ্য</h2>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">আপনার নাম (রিপোর্টের জন্য)</label>
+                    <input type="text" id="userName" placeholder="যেমন: আব্দুল্লাহ" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm text-center">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">জন্মতারিখ (ঐচ্ছিক)</label>
+                        <input type="date" id="dob" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm" onchange="calculateAgeFromDob()">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">বয়স (বছর)</label>
+                        <input type="text" inputmode="decimal" id="age" value="৩০" oninput="handleNumberInput(this)" data-raw="30" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-center text-lg" style="font-family: var(--font-display);">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">বর্তমান ওজন (কেজি)</label>
+                    <input type="text" inputmode="decimal" id="weight" value="৬৫" oninput="handleNumberInput(this)" data-raw="65" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-center text-lg" style="font-family: var(--font-display);">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">উচ্চতা (ফুট)</label>
+                        <select id="heightFeet" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-center text-sm" style="font-family: var(--font-display);">
+                            <option value="4">৪ ফুট</option>
+                            <option value="5" selected>৫ ফুট</option>
+                            <option value="6">৬ ফুট</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">উচ্চতা (ইঞ্চি)</label>
+                        <select id="heightInches" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-center text-sm" style="font-family: var(--font-display);">
+                            <!-- Generated half-inch steps -->
+                            <option value="0">০ ইঞ্চি</option><option value="0.5">০.৫ ইঞ্চি</option>
+                            <option value="1">১ ইঞ্চি</option><option value="1.5">১.৫ ইঞ্চি</option>
+                            <option value="2">২ ইঞ্চি</option><option value="2.5">২.৫ ইঞ্চি</option>
+                            <option value="3">৩ ইঞ্চি</option><option value="3.5">৩.৫ ইঞ্চি</option>
+                            <option value="4">৪ ইঞ্চি</option><option value="4.5">৪.৫ ইঞ্চি</option>
+                            <option value="5" selected>৫ ইঞ্চি</option><option value="5.5">৫.৫ ইঞ্চি</option>
+                            <option value="6">৬ ইঞ্চি</option><option value="6.5">৬.৫ ইঞ্চি</option>
+                            <option value="7">৭ ইঞ্চি</option><option value="7.5">৭.৫ ইঞ্চি</option>
+                            <option value="8">৮ ইঞ্চি</option><option value="8.5">৮.৫ ইঞ্চি</option>
+                            <option value="9">৯ ইঞ্চি</option><option value="9.5">৯.৫ ইঞ্চি</option>
+                            <option value="10">১০ ইঞ্চি</option><option value="10.5">১০.৫ ইঞ্চি</option>
+                            <option value="11">১১ ইঞ্চি</option><option value="11.5">১১.৫ ইঞ্চি</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">লিঙ্গ</label>
+                        <select id="gender" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm" onchange="toggleGenderOptions()">
+                            <option value="male">পুরুষ</option>
+                            <option value="female">নারী</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">বৈবাহিক অবস্থা</label>
+                        <select id="maritalStatus" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm" onchange="toggleMaritalLife()">
+                            <option value="single">অবিবাহিত</option>
+                            <option value="married">বিবাহিত</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="femaleOptionsDiv" class="mt-4 hidden animate-[slideUp_0.3s_ease-out]">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">বিশেষ শারীরিক অবস্থা (নারীদের জন্য)</label>
+                    <select id="pregnancyStatus" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                        <option value="none">স্বাভাবিক</option>
+                        <option value="pregnant">গর্ভবতী (Pregnancy)</option>
+                        <option value="lactating">স্তন্যদানকারী মা (Lactating)</option>
+                    </select>
+                </div>
+
+                <div id="maritalLifeDiv" class="mt-4 hidden animate-[slideUp_0.3s_ease-out]">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">দাম্পত্য জীবন কেমন কাটছে?</label>
+                    <select id="maritalLife" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                        <option value="good">সুখী / স্বাভাবিক</option>
+                        <option value="stressful">অশান্তি / মানসিক চাপযুক্ত</option>
+                    </select>
+                </div>
+            </div>
+            <button onclick="switchTab('tab-habits')" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">পরবর্তী ধাপ (অভ্যাস) &rarr;</button>
+        </div>
+
+        <div id="tab-habits" class="space-y-4 hidden">
+            <div class="glass-card p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center font-bold">2</div>
+                    <h2 class="font-bold text-slate-700">খাদ্যাভ্যাস ও রুটিন</h2>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div class="col-span-2">
+                        <label class="block text-xs font-bold text-slate-500 mb-1">সারাদিনের কাজ / পরিশ্রম</label>
+                        <select id="activity" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="sedentary">বসে কাজ / শারীরিক পরিশ্রম নেই</option>
+                            <option value="moderate">হালকা পরিশ্রম / নিয়মিত হাঁটাচলা</option>
+                            <option value="active">ভারী পরিশ্রম / জিম / কায়িক শ্রম</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">দিনে কতবার খান?</label>
+                        <select id="mealCount" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="1-2">১-২ বার</option>
+                            <option value="3" selected>৩ বার</option>
+                            <option value="4+">৪ বার বা তার বেশি</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">খাওয়ার সময়</label>
+                        <select id="mealTiming" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="regular">সময়মতো খাই</option>
+                            <option value="irregular">অনিয়মিত</option>
+                            <option value="late_night">গভীর রাতে খাই</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-2">প্রতিদিন সাধারণত কী কী খান? (একাধিক নির্বাচন)</label>
+                    <div class="flex flex-wrap gap-2" id="food-chips">
+                        <!-- Rendered by JS below -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">পানি পান (দৈনিক)</label>
+                        <select id="water" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="low">কম (১-১.৫ লিটার)</option>
+                            <option value="medium" selected>মাঝারি (২-২.৫ লিটার)</option>
+                            <option value="high">পর্যাপ্ত (৩+ লিটার)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">টয়লেট / মলত্যাগ</label>
+                        <select id="bowel" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="normal" selected>স্বাভাবিক (প্রতিদিন)</option>
+                            <option value="constipation">ক্লিয়ার হয় না / কোষ্ঠকাঠিন্য</option>
+                            <option value="loose">পাতলা পায়খানা</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">ঘুমের পরিমাণ</label>
+                        <select id="sleep" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="less">৬ ঘণ্টার কম</option>
+                            <option value="good" selected>৬-৮ ঘণ্টা</option>
+                            <option value="more">৮ ঘণ্টার বেশি</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">মানসিক চাপ</label>
+                        <select id="stress" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="normal" selected>স্বাভাবিক</option>
+                            <option value="high">অনেক বেশি / দুশ্চিন্তা</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <button onclick="switchTab('tab-medical')" class="w-full bg-emerald-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform">পরবর্তী ধাপ (মেডিকেল) &rarr;</button>
+        </div>
+
+        <div id="tab-medical" class="space-y-4 hidden">
+            <div class="glass-card p-5">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center font-bold">3</div>
+                    <h2 class="font-bold text-slate-700">মেডিকেল ও বদভ্যাস</h2>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1">বর্তমান শারীরিক সমস্যা</label>
+                    <select id="symptoms" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                        <option value="none">সম্পূর্ণ সুস্থ</option>
+                        <option value="fatigue">অতিরিক্ত ক্লান্তি ও দুর্বলতা</option>
+                        <option value="headache">ঘন ঘন মাথা ব্যথা</option>
+                        <option value="joint_pain">হাড় বা জয়েন্টে ব্যথা</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">রক্তচাপ (BP)</label>
+                        <select id="bp" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="normal">স্বাভাবিক</option>
+                            <option value="high">উচ্চ (High BP)</option>
+                            <option value="low">নিম্ন (Low BP)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1">ডায়াবেটিস</label>
+                        <select id="diabetes" class="w-full p-3 input-3d rounded-xl font-bold text-slate-700 text-sm">
+                            <option value="none">নেই</option>
+                            <option value="prediabetes">প্রি-ডায়াবেটিস</option>
+                            <option value="yes">আক্রান্ত</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-5">
+                    <label class="block text-xs font-bold text-slate-500 mb-2">নেশা বা বদভ্যাস (একাধিক নির্বাচন)</label>
+                    <div class="flex flex-wrap gap-2" id="addiction-chips">
+                        <!-- Rendered by JS below -->
+                    </div>
+                </div>
+            </div>
+            <button onclick="generateReport()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform text-lg">
+                ✨ এআই রিপোর্ট ও ডায়েট চার্ট তৈরি করুন
+            </button>
+        </div>
+
+        <div id="tab-progress" class="space-y-4 hidden pb-10">
+            <div class="glass-card p-5">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="font-extrabold text-slate-700 text-lg" style="font-family: var(--font-serif);">ওজন ট্র্যাকিং হিস্ট্রি</h2>
+                    <button onclick="clearHistory()" class="text-xs font-bold text-rose-500 bg-rose-50 px-3 py-1 rounded-full">হিস্ট্রি মুছুন</button>
+                </div>
+                <div id="history-list" class="space-y-3">
+                    <!-- Progress items will be injected here -->
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-report" class="space-y-4 hidden pb-10">
+            <div id="report-container"></div>
+            <!-- Image Download Button -->
+            <button id="download-btn" onclick="downloadReportAsImage()" class="no-print mt-6 w-full bg-slate-800 text-white font-bold py-4 rounded-xl shadow-lg active:scale-95 transition-transform flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                রিপোর্টের ছবি ডাউনলোড করুন
+            </button>
+        </div>
+
+    </main>
+
+    <nav class="absolute bottom-0 w-full glass-card rounded-none rounded-t-3xl pb-safe z-20 border-t border-white/40 no-print">
+        <div class="flex justify-around items-center p-2">
+            <button onclick="switchTab('tab-body')" class="nav-item nav-body active flex flex-col items-center p-2 text-slate-400 w-1/5">
+                <div class="nav-icon mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold">বডি</span>
+            </button>
+            <button onclick="switchTab('tab-habits')" class="nav-item nav-habits flex flex-col items-center p-2 text-slate-400 w-1/5">
+                <div class="nav-icon mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold">অভ্যাস</span>
+            </button>
+            <button onclick="switchTab('tab-medical')" class="nav-item nav-medical flex flex-col items-center p-2 text-slate-400 w-1/5">
+                <div class="nav-icon mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold">মেডিকেল</span>
+            </button>
+            <button onclick="switchTab('tab-progress'); loadHistory();" class="nav-item nav-progress flex flex-col items-center p-2 text-slate-400 w-1/5">
+                <div class="nav-icon mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold">প্রগ্রেস</span>
+            </button>
+            <button onclick="switchTab('tab-report')" class="nav-item nav-report flex flex-col items-center p-2 text-slate-400 w-1/5">
+                <div class="nav-icon mb-1">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                </div>
+                <span class="text-[9px] font-bold">রিপোর্ট</span>
+            </button>
+        </div>
+    </nav>
+
+    <script>
+        // Number Conversion Utilities (Language Intelligence)
+        const engToBen = {'0': '০', '1': '১', '2': '২', '3': '৩', '4': '৪', '5': '৫', '6': '৬', '7': '৭', '8': '৮', '9': '৯', '.': '.'};
+        const benToEng = {'০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9'};
+        
+        function toBenNum(num) { return String(num).split('').map(c => engToBen[c] || c).join(''); }
+        function toEngNum(str) { return String(str).split('').map(c => benToEng[c] || c).join(''); }
+        
+        function handleNumberInput(input) {
+            let val = toEngNum(input.value);
+            val = val.replace(/[^0-9.]/g, ''); 
+            const dotCount = (val.match(/\./g) || []).length;
+            if (dotCount > 1) { val = val.substring(0, val.lastIndexOf('.')); }
+            input.setAttribute('data-raw', val);
+            input.value = toBenNum(val);
+        }
+
+        // Initialize Chips
+        const foodOptions = ['ভাত/রুটি', 'মাছ/মাংস', 'ডাল', 'শাকসবজি', 'ফলমূল', 'ফাস্টফুড', 'মিষ্টিজাতীয়', 'ভাজাপোড়া'];
+        const addictionOptions = ['ধূমপান', 'মদ/অ্যালকোহল', 'মাদক', 'পান-সুপারি', 'জর্দা/গুল', 'কোল্ড ড্রিংকস'];
+        
+        let selectedFoods = ['ভাত/রুটি', 'মাছ/মাংস'];
+        let selectedAddictions = [];
+
+        function renderChips(containerId, options, selectedArray, type) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = options.map(item => {
+                const isSelected = selectedArray.includes(item);
+                const activeClass = type === 'danger' ? 'selected-danger' : 'selected';
+                return `<button class="chip-btn ${isSelected ? activeClass : ''}" onclick="toggleChip('${item}', this, '${type}')">${item}</button>`;
+            }).join('');
+        }
+
+        function toggleChip(item, btn, type) {
+            const arr = type === 'danger' ? selectedAddictions : selectedFoods;
+            const idx = arr.indexOf(item);
+            const activeClass = type === 'danger' ? 'selected-danger' : 'selected';
+            
+            if (idx > -1) {
+                arr.splice(idx, 1);
+                btn.classList.remove(activeClass);
+            } else {
+                arr.push(item);
+                btn.classList.add(activeClass);
+            }
+            saveFormData();
+        }
+
+        function calculateAgeFromDob() {
+            const dobInput = document.getElementById('dob').value;
+            if(!dobInput) return;
+            const dob = new Date(dobInput);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const m = today.getMonth() - dob.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+            if(age < 0) age = 0;
+            const ageInput = document.getElementById('age');
+            ageInput.value = toBenNum(age);
+            ageInput.setAttribute('data-raw', age);
+            saveFormData();
+        }
+
+        function saveFormData() {
+            const inputs = document.querySelectorAll('input, select');
+            const data = {};
+            inputs.forEach(el => {
+                if(el.id) {
+                    data[el.id] = el.getAttribute('data-raw') || el.value;
+                }
+            });
+            data.foods = selectedFoods;
+            data.addictions = selectedAddictions;
+            localStorage.setItem('healthProfileData', JSON.stringify(data));
+        }
+
+        function loadFormData() {
+            try {
+                const saved = localStorage.getItem('healthProfileData');
+                if(saved) {
+                    const data = JSON.parse(saved);
+                    for(const key in data) {
+                        const el = document.getElementById(key);
+                        if(el) {
+                            if(el.tagName === 'INPUT' && (key === 'age' || key === 'weight')) {
+                                el.setAttribute('data-raw', data[key]);
+                                el.value = toBenNum(data[key]);
+                            } else {
+                                el.value = data[key];
+                            }
+                        }
+                    }
+                    if(data.foods) selectedFoods = data.foods;
+                    if(data.addictions) selectedAddictions = data.addictions;
+                    
+                    toggleGenderOptions();
+                    if(document.getElementById('maritalStatus').value === 'married') toggleMaritalLife();
+                }
+            } catch(e) { console.error("Error loading data", e); }
+        }
+
+        window.onload = () => {
+            loadFormData();
+            renderChips('food-chips', foodOptions, selectedFoods, 'primary');
+            renderChips('addiction-chips', addictionOptions, selectedAddictions, 'danger');
+            loadHistory();
+
+            // Auto-save listeners
+            document.querySelectorAll('input, select').forEach(el => {
+                el.addEventListener('change', saveFormData);
+                if(el.tagName === 'INPUT' && (el.type === 'text' || el.type === 'number')) {
+                    el.addEventListener('input', saveFormData);
+                }
+            });
+        };
+
+        function toggleMaritalLife() {
+            const status = document.getElementById('maritalStatus').value;
+            const lifeDiv = document.getElementById('maritalLifeDiv');
+            if (status === 'married') { lifeDiv.classList.remove('hidden'); } 
+            else { lifeDiv.classList.add('hidden'); }
+        }
+
+        function toggleGenderOptions() {
+            const gender = document.getElementById('gender').value;
+            const femaleDiv = document.getElementById('femaleOptionsDiv');
+            if(gender === 'female') { femaleDiv.classList.remove('hidden'); }
+            else { femaleDiv.classList.add('hidden'); document.getElementById('pregnancyStatus').value = 'none'; }
+        }
+
+        function switchTab(tabId) {
+            ['tab-body', 'tab-habits', 'tab-medical', 'tab-progress', 'tab-report'].forEach(id => {
+                document.getElementById(id).classList.add('hidden');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            
+            if(tabId !== 'tab-report' && tabId !== 'tab-progress') {
+                document.getElementById(tabId).style.animation = 'none';
+                document.getElementById(tabId).offsetHeight;
+                document.getElementById(tabId).style.animation = 'slideUp 0.3s ease-out';
+            }
+
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            const tabName = tabId.split('-')[1];
+            const activeNav = document.querySelector(`.nav-${tabName}`);
+            if (activeNav) activeNav.classList.add('active');
+
+            document.getElementById('main-content').scrollTo(0,0);
+        }
+
+        function saveProgress(weight, bmi) {
+            const today = new Date().toLocaleDateString('bn-BD'); // Get local date format
+            let history = JSON.parse(localStorage.getItem('bmiHistory')) || [];
+            
+            // Check if today already exists, if so update it, else push new
+            const existingIndex = history.findIndex(h => h.date === today);
+            if(existingIndex > -1) {
+                history[existingIndex] = { date: today, weight: weight, bmi: bmi };
+            } else {
+                history.push({ date: today, weight: weight, bmi: bmi });
+            }
+            
+            localStorage.setItem('bmiHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('bmiHistory')) || [];
+            const container = document.getElementById('history-list');
+            
+            if(history.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-400 text-sm py-10 font-bold">কোনো পূর্বের রেকর্ড পাওয়া যায়নি। রিপোর্ট জেনারেট করলে এখানে সেভ হবে।</div>`;
+                return;
+            }
+
+            // Reverse to show latest first
+            const reversed = [...history].reverse();
+            
+            container.innerHTML = reversed.map((h, i) => {
+                let trendIcon = '';
+                if(i < reversed.length - 1) { // Compare with previous entry (which is next in reversed array)
+                    const prevW = reversed[i+1].weight;
+                    if(h.weight > prevW) trendIcon = `<span class="text-rose-500 font-bold text-xs flex items-center">↑ ${toBenNum((h.weight - prevW).toFixed(1))}</span>`;
+                    else if(h.weight < prevW) trendIcon = `<span class="text-emerald-500 font-bold text-xs flex items-center">↓ ${toBenNum((prevW - h.weight).toFixed(1))}</span>`;
+                    else trendIcon = `<span class="text-slate-400 font-bold text-xs">-</span>`;
+                }
+                
+                return `
+                <div class="glass-card p-3 flex justify-between items-center border-l-4 border-blue-500">
+                    <div>
+                        <p class="text-xs text-slate-500 font-bold">${h.date}</p>
+                        <p class="text-lg font-extrabold text-slate-700" style="font-family: var(--font-display);">${toBenNum(h.weight)} <span class="text-xs">কেজি</span></p>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">BMI</p>
+                        <p class="font-bold text-indigo-600 mb-1" style="font-family: var(--font-display);">${toBenNum(h.bmi)}</p>
+                        ${trendIcon}
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function clearHistory() {
+            if(confirm('আপনি কি নিশ্চিত যে সমস্ত হিস্ট্রি মুছে ফেলতে চান?')) {
+                localStorage.removeItem('bmiHistory');
+                loadHistory();
+            }
+        }
+
+        function getDietChart(bmiCategory, tdee, isPregnant, isLactating) {
+            let targetCalories = tdee;
+            let goalText = "ওজন ধরে রাখার ডায়েট";
+            
+            if (bmiCategory.includes("আন্ডারওয়েট")) {
+                targetCalories += 500;
+                goalText = "ওজন বৃদ্ধির স্বাস্থ্যকর ডায়েট";
+            } else if (bmiCategory.includes("ওভারওয়েট") || bmiCategory.includes("ওবেসিটি")) {
+                if(!isPregnant && !isLactating) { // Pregnant women shouldn't be in huge calorie deficit
+                    targetCalories -= 500;
+                    goalText = "ওজন কমানোর ফ্যাট-লস ডায়েট";
+                }
+            }
+
+            if(isPregnant) { targetCalories += 300; goalText = "গর্ভবতী মায়ের বিশেষ পুষ্টি চার্ট"; }
+            if(isLactating) { targetCalories += 500; goalText = "স্তন্যদানকারী মায়ের বিশেষ ডায়েট"; }
+
+            // Basic localized meal assignments based on goal
+            let breakfast, lunch, dinner, snacks;
+            
+            if(goalText.includes("কমানোর")) {
+                breakfast = "২টি লাল আটার রুটি + ১ বাটি মিক্সড সবজি (কম তেলে) + ১টি ডিমের সাদা অংশ।";
+                lunch = "১ কাপ ভাত (লাল চাল হলে ভালো) + ১ টুকরা মাছ/মুরগি + প্রচুর সালাদ ও ১ বাটি ডাল।";
+                snacks = "১টি আপেল বা পেয়ারা + গ্রিন টি (চিনি ছাড়া)।";
+                dinner = "১টি রুটি বা হাফ কাপ ভাত + ১ বাটি সবজি + ছোট ১ টুকরা মাছ। (রাত ৮টার মধ্যে)।";
+            } else if (goalText.includes("বৃদ্ধির") || isPregnant || isLactating) {
+                breakfast = "৩-৪টি রুটি বা পরোটা + ২টো ডিম ভাজি + ১ বাটি সবজি + ১ গ্লাস দুধ।";
+                lunch = "পর্যাপ্ত ভাত + ২ টুকরো মাছ বা মাংস + ঘন ডাল + সালাদ।";
+                snacks = "১ মুঠো কাঠবাদাম/কাজু + ১টি কলা বা ১ বাটি দই।";
+                dinner = "পর্যাপ্ত ভাত/রুটি + সবজি + ১ গ্লাস গরম দুধ (ঘুমানোর আগে)।";
+            } else {
+                breakfast = "২-৩টি রুটি + ১টি ডিম + সবজি।";
+                lunch = "স্বাভাবিক পরিমাপে ভাত + ১ টুকরা মাছ/মাংস + ডাল + সবজি।";
+                snacks = "যেকোনো একটি দেশীয় ফল + চিনি ছাড়া চা।";
+                dinner = "হালকা ভাত বা রুটি + সবজি + ডাল।";
+            }
+
+            return `
+                <div class="mt-6 border-t-2 border-dashed border-slate-200 pt-5">
+                    <h3 class="font-extrabold text-slate-700 mb-2 text-center" style="font-family: var(--font-serif);">🍽️ আপনার নিজস্ব ডায়েট চার্ট</h3>
+                    <p class="text-xs text-center text-indigo-600 font-bold mb-4">উদ্দেশ্য: ${goalText} (~${toBenNum(Math.round(targetCalories))} ক্যালরি)</p>
+                    
+                    <div class="space-y-2">
+                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-100">
+                            <p class="text-xs font-bold text-amber-800 mb-1">সকাল (Breakfast)</p>
+                            <p class="text-sm text-slate-700">${breakfast}</p>
+                        </div>
+                        <div class="bg-blue-50 p-3 rounded-xl border border-blue-100">
+                            <p class="text-xs font-bold text-blue-800 mb-1">দুপুর (Lunch)</p>
+                            <p class="text-sm text-slate-700">${lunch}</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-xl border border-purple-100">
+                            <p class="text-xs font-bold text-purple-800 mb-1">বিকাল (Snacks)</p>
+                            <p class="text-sm text-slate-700">${snacks}</p>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+                            <p class="text-xs font-bold text-indigo-800 mb-1">রাত (Dinner)</p>
+                            <p class="text-sm text-slate-700">${dinner}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+
+        function generateReport() {
+            try {
+                const data = {
+                    userName: document.getElementById('userName').value.trim(),
+                    age: parseInt(document.getElementById('age').getAttribute('data-raw')) || 30,
+                    weight: parseFloat(document.getElementById('weight').getAttribute('data-raw')) || 65,
+                    hFeet: parseInt(document.getElementById('heightFeet').value) || 5,
+                    hInch: parseFloat(document.getElementById('heightInches').value) || 0,
+                    gender: document.getElementById('gender').value,
+                    pregStatus: document.getElementById('pregnancyStatus').value,
+                    maritalStatus: document.getElementById('maritalStatus').value,
+                    maritalLife: document.getElementById('maritalLife') ? document.getElementById('maritalLife').value : 'good',
+                    
+                    activity: document.getElementById('activity').value,
+                    mealCount: document.getElementById('mealCount').value,
+                    mealTiming: document.getElementById('mealTiming').value,
+                    water: document.getElementById('water').value,
+                    bowel: document.getElementById('bowel').value,
+                    sleep: document.getElementById('sleep').value,
+                    stress: document.getElementById('stress').value,
+                    
+                    symptoms: document.getElementById('symptoms').value,
+                    bp: document.getElementById('bp').value,
+                    diabetes: document.getElementById('diabetes').value,
+                    
+                    foods: selectedFoods,
+                    addictions: selectedAddictions
+                };
+
+                const heightInMeters = ((data.hFeet * 12) + data.hInch) * 0.0254;
+                const bmi = (data.weight / (heightInMeters * heightInMeters)).toFixed(1);
+                
+                // Save to Progress Tracker
+                saveProgress(data.weight, bmi);
+
+                // South Asian BMI Cut-offs
+                let bmiCat, bmiColor, bmiGlow;
+                if (bmi < 18.5) { bmiCat = "আন্ডারওয়েট (ওজন কম)"; bmiColor = "text-amber-500"; bmiGlow = "shadow-amber-500/30"; }
+                else if (bmi >= 18.5 && bmi < 23) { bmiCat = "স্বাভাবিক ও সুন্দর"; bmiColor = "text-emerald-500"; bmiGlow = "shadow-emerald-500/30"; }
+                else if (bmi >= 23 && bmi < 25) { bmiCat = "ওভারওয়েট (ঝুঁকিপূর্ণ)"; bmiColor = "text-orange-500"; bmiGlow = "shadow-orange-500/30"; }
+                else { bmiCat = "ওবেসিটি (মেদবহুল)"; bmiColor = "text-rose-600"; bmiGlow = "shadow-rose-600/30"; }
+
+                const idealWeight = (22 * (heightInMeters * heightInMeters)).toFixed(1);
+                
+                // BMR Calculation (Mifflin-St Jeor)
+                let heightCm = heightInMeters * 100;
+                let bmr = (10 * data.weight) + (6.25 * heightCm) - (5 * data.age);
+                bmr = data.gender === 'male' ? bmr + 5 : bmr - 161;
+                
+                // TDEE
+                let activityMulti = 1.2;
+                if(data.activity === 'moderate') activityMulti = 1.55;
+                if(data.activity === 'active') activityMulti = 1.9;
+                let tdee = Math.round(bmr * activityMulti);
+
+                // AI Rules Generation
+                let advices = [];
+
+                if(data.gender === 'female' && data.pregStatus === 'pregnant') advices.push({icon: "👶", title: "গর্ভাবস্থা সতর্কতা", text: "গর্ভাবস্থায় বিএমআই স্কেল স্বাভাবিকের চেয়ে বেশি দেখায়। আপনার ও গর্ভের শিশুর জন্য এখন প্রচুর প্রোটিন, আয়রন ও ক্যালসিয়ামযুক্ত খাবার প্রয়োজন।"});
+                if(data.gender === 'female' && data.pregStatus === 'lactating') advices.push({icon: "🍼", title: "স্তন্যদানকারী মা", text: "বাচ্চাকে দুধ খাওয়ানোর জন্য আপনার দৈনিক অন্তত ৫০০ ক্যালরি অতিরিক্ত প্রয়োজন। প্রচুর তরল ও পুষ্টিকর খাবার খান।"});
+
+                if(bmi >= 23 && data.pregStatus !== 'pregnant') advices.push({icon: "🏃", title: "ওজন নিয়ন্ত্রণ (দক্ষিণ এশীয় স্কেল)", text: `বাঙালি স্কেল অনুযায়ী আপনার বিএমআই ২৩ এর উপরে, যা ওভারওয়েট। আদর্শ ওজন ${toBenNum(idealWeight)} কেজিতে নামিয়ে আনার চেষ্টা করুন।`});
+                
+                if(data.mealTiming === 'late_night' || data.mealCount === '1-2') advices.push({icon: "🌙", title: "খাবারের সময় ও রুটিন", text: "গভীর রাতে খাওয়া এবং দীর্ঘক্ষণ না খেয়ে থাকা মেটাবলিজম ধীর করে লিভারে ফ্যাট জমায়। দিনে অন্তত ৩ বার সময়মতো খাওয়ার চেষ্টা করুন।"});
+                
+                if(data.foods.includes('ফাস্টফুড') || data.foods.includes('মিষ্টিজাতীয়') || data.foods.includes('ভাজাপোড়া')) advices.push({icon: "🍔", title: "খাদ্যাভ্যাস সতর্কতা", text: "ফাস্টফুড ও ভাজাপোড়া আপনার ফ্যাটি লিভার এবং ওবেসিটির ঝুঁকি মারাত্মকভাবে বাড়াচ্ছে। এগুলো পরিহার করুন।"});
+                if(!data.foods.includes('শাকসবজি') && !data.foods.includes('ফলমূল')) advices.push({icon: "🥬", title: "ফাইবারের অভাব", text: "আপনার খাবারে পর্যাপ্ত শাকসবজির অভাব রয়েছে। সুস্থ ইমিউনিটির জন্য ফাইবারযুক্ত খাবার অত্যন্ত জরুরি।"});
+
+                if(data.bowel === 'constipation' || data.water === 'low') advices.push({icon: "💧", title: "পানি ও হজম", text: "আপনার পানি পান কম হচ্ছে অথবা কোষ্ঠকাঠিন্য আছে। ইসবগুলের ভুসি এবং প্রতিদিন অন্তত ২.৫ লিটার পানি পানের অভ্যাস করুন।"});
+                
+                if(data.stress === 'high' || (data.maritalStatus === 'married' && data.maritalLife === 'stressful')) advices.push({icon: "🧠", title: "মানসিক চাপ ও হরমোন", text: "অতিরিক্ত স্ট্রেস বা দাম্পত্য কলহ আপনার শরীরে কর্টিসল হরমোন বাড়িয়ে দেয়, যা মেদ বাড়ায়। প্রতিদিন অন্তত ১০ মিনিট মেডিটেশন বা ডিপ ব্রিদিং করুন।"});
+                
+                if(data.symptoms === 'fatigue' || data.symptoms === 'joint_pain') advices.push({icon: "🦴", title: "ক্লান্তি ও হাড়ের ব্যথা", text: "ক্লান্তি ও জয়েন্টে ব্যথার প্রধান কারণ ভিটামিন ডি ও ক্যালসিয়ামের অভাব। রোদে হাঁটার অভ্যাস করুন এবং দুধ/ডিম খান।"});
+                
+                if(data.bp === 'high' || data.diabetes !== 'none') advices.push({icon: "❤️", title: "প্রেশার ও ডায়াবেটিস সতর্কতা", text: "রক্তচাপ বা ডায়াবেটিসের জন্য কাঁচা লবণ ও চিনি সম্পূর্ণ বর্জন করুন। প্রতিদিন অন্তত ৩০ মিনিট ঘাম ঝরিয়ে হাঁটা আপনার জন্য ঔষধের মতো কাজ করবে।"});
+                
+                if(data.addictions.length > 0) advices.push({icon: "⚠️", title: "নেশা ও ক্যানসারের ঝুঁকি", text: `${data.addictions.join(", ")} আপনার শরীরকে ভেতর থেকে ধ্বংস করছে। ক্যান্সার ও হার্ট অ্যাটাকের ঝুঁকি এড়াতে এগুলো দ্রুত বর্জন করুন।`});
+
+                const dietChartHtml = getDietChart(bmiCat, tdee, data.pregStatus === 'pregnant', data.pregStatus === 'lactating');
+                const userNameDisplay = data.userName ? `${data.userName} - এর ` : `আপনার `;
+
+                const reportHTML = `
+                    <div class="text-center mb-4 no-print">
+                        <h2 class="text-xl font-extrabold text-slate-800" style="font-family: var(--font-serif);">${userNameDisplay}স্মার্ট হেলথ রিপোর্ট</h2>
+                        <p class="text-xs text-slate-500 font-bold mt-1">বয়স: ${toBenNum(data.age)} বছর | ওজন: ${toBenNum(data.weight)} কেজি</p>
+                    </div>
+                    
+                    <div class="print-show text-center mb-6 border-b-2 border-slate-200 pb-4">
+                        <h1 class="text-3xl font-extrabold text-slate-800" style="font-family: var(--font-serif);">স্মার্ট হেলথ রিপোর্ট</h1>
+                        <h2 class="text-xl font-bold text-slate-700 mt-2">নাম: ${data.userName || 'অজ্ঞাত'}</h2>
+                        <p class="text-sm text-slate-500 font-bold mt-1">বয়স: ${toBenNum(data.age)} বছর | ওজন: ${toBenNum(data.weight)} কেজি | তারিখ: ${toBenNum(new Date().toLocaleDateString('bn-BD'))}</p>
+                    </div>
+
+                    <div class="glass-card p-5 text-center shadow-lg ${bmiGlow}">
+                        <p class="text-sm font-bold text-slate-500 mb-2">আপনার বিএমআই (BMI)</p>
+                        <div class="text-5xl font-extrabold ${bmiColor} mb-2" style="font-family: var(--font-display);">${toBenNum(bmi)}</div>
+                        <div class="inline-block px-4 py-1 rounded-full text-sm font-bold bg-slate-100 ${bmiColor}">${bmiCat}</div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div class="glass-card p-4 text-center border-b-4 border-blue-400">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">আদর্শ ওজন</p>
+                            <p class="text-lg font-bold text-slate-800 mt-1" style="font-family: var(--font-display);">${toBenNum(idealWeight)} <span class="text-xs">কেজি</span></p>
+                        </div>
+                        <div class="glass-card p-4 text-center border-b-4 border-cyan-400">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">পানির চাহিদা</p>
+                            <p class="text-lg font-bold text-slate-800 mt-1" style="font-family: var(--font-display);">${toBenNum((data.weight * 0.035).toFixed(1))} <span class="text-xs">লিটার</span></p>
+                        </div>
+                        <div class="glass-card p-4 text-center col-span-2 border-b-4 border-emerald-400">
+                            <p class="text-[10px] font-bold text-slate-500 uppercase">দৈনিক ক্যালরি চাহিদা (TDEE)</p>
+                            <p class="text-xl font-bold text-slate-800 mt-1" style="font-family: var(--font-display);">${toBenNum(tdee)} <span class="text-xs font-normal">ক্যালরি/দিন</span></p>
+                            <p class="text-[10px] text-slate-500 mt-1">(বর্তমান ওজন ধরে রাখতে)</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6">
+                        <h3 class="font-extrabold text-slate-700 mb-4 flex items-center gap-2" style="font-family: var(--font-serif);">
+                            <svg class="w-5 h-5 text-indigo-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                            বিস্তারিত এআই পরামর্শ
+                        </h3>
+                        <div class="space-y-3">
+                            ${advices.map((adv, idx) => `
+                                <div class="glass-card p-4 report-section flex gap-3" style="animation-delay: ${idx * 0.1}s">
+                                    <div class="text-2xl">${adv.icon}</div>
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-sm mb-1">${adv.title}</h4>
+                                        <p class="text-[13px] text-slate-600 leading-relaxed font-medium">${adv.text}</p>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    ${dietChartHtml}
+                `;
+
+                document.getElementById('report-container').innerHTML = reportHTML;
+                switchTab('tab-report');
+                
+            } catch (error) {
+                console.error(error);
+                document.getElementById('report-container').innerHTML = `<div class="p-4 bg-red-100 text-red-600 rounded-xl font-bold text-center">ডেটা প্রসেসিংয়ে সমস্যা হয়েছে। দয়া করে সব ইনপুট ঠিকমতো দিন।</div>`;
+                switchTab('tab-report');
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            if(document.activeElement && document.activeElement.tagName === 'INPUT'){
+                try { document.activeElement.scrollIntoView({behavior: "smooth", block: "center"}); } 
+                catch(e) {}
+            }
+        });
+
+        // Image Download Function
+        function downloadReportAsImage() {
+            const btn = document.getElementById('download-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'অপেক্ষা করুন... ছবি তৈরি হচ্ছে...';
+            btn.disabled = true;
+
+            const element = document.getElementById('report-container');
+            const userName = document.getElementById('userName').value.trim() || 'User';
+            
+            // Temporary styles for beautiful screenshot
+            const originalBg = element.style.backgroundColor;
+            const originalPadding = element.style.padding;
+            const originalRadius = element.style.borderRadius;
+            
+            element.style.backgroundColor = '#f1f5f9';
+            element.style.padding = '20px';
+            element.style.borderRadius = '16px';
+
+            html2canvas(element, { 
+                scale: 2, // High resolution
+                useCORS: true,
+                backgroundColor: '#f1f5f9'
+            }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `Health_Report_${userName}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+                // Revert temporary styles
+                element.style.backgroundColor = originalBg;
+                element.style.padding = originalPadding;
+                element.style.borderRadius = originalRadius;
+                
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error(err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                alert('দুঃখিত, ছবি ডাউনলোড করতে সমস্যা হয়েছে।');
+            });
+        }
+    </script>
+</body>
+</html>
